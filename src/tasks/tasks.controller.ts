@@ -9,7 +9,7 @@ import {
 	Query,
 } from '@nestjs/common';
 import { TasksService } from './tasks.service';
-import { Task } from './task.model';
+import { Task } from './task.entity';
 import { CreateTaskDto } from './DTO/create-task.dto';
 import { GetTasksFilterDto } from './DTO/get-tasks-filter.dto';
 import { UpdateTaskStatusDto } from './DTO/update-task-status.dto';
@@ -19,7 +19,7 @@ export class TasksController {
 	constructor(private tasksService: TasksService) {}
 
 	@Get()
-	getAllTasks(@Query() filterDto: GetTasksFilterDto): Task[] {
+	async getAllTasks(@Query() filterDto: GetTasksFilterDto): Promise<Task[]> {
 		if (Object.keys(filterDto).length) {
 			return this.tasksService.getTasksWithFilters(filterDto);
 		} else {
@@ -28,25 +28,25 @@ export class TasksController {
 	}
 
 	@Get('/:id')
-	getTask(@Param('id') id: string): Task {
+	getTaskById(@Param('id') id: string): Promise<Task> {
 		return this.tasksService.getTaskById(id);
 	}
 
 	@Post()
-	createTask(@Body() createTaskDto: CreateTaskDto): Task[] {
+	createTask(@Body() createTaskDto: CreateTaskDto): Promise<Task> {
 		return this.tasksService.createTask(createTaskDto);
 	}
 
 	@Delete('/:id')
-	deleteTask(@Param('id') id: string): void {
-		this.tasksService.deleteTask(id);
+	deleteTask(@Param('id') id: string): Promise<void> {
+		return this.tasksService.deleteTask(id);
 	}
 
 	@Patch('/:id/status')
 	updateTaskStatus(
 		@Param('id') id: string,
 		@Body() updateTaskStatusDto: UpdateTaskStatusDto,
-	): Task {
+	): Promise<Task> {
 		const { status } = updateTaskStatusDto;
 		return this.tasksService.updateTaskStatus(id, status);
 	}
