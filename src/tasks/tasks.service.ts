@@ -51,22 +51,20 @@ export class TasksService {
 
 	async getTasksWithFilters(filterDto: GetTasksFilterDto): Promise<Task[]> {
 		const { status, search } = filterDto;
-
-		let tasks = await this.getAllTasks();
+		const query = this.tasksRepository.createQueryBuilder('task');
 
 		if (status) {
-			tasks = tasks.filter((task) => task.status === status);
+			query.andWhere('task.status = :status', { status });
 		}
 
 		if (search) {
-			tasks = tasks.filter((task) => {
-				if (task.title.includes(search) || task.description.includes(search)) {
-					return true;
-				}
-				return false;
-			});
+			query.andWhere(
+				'(LOWER(task.title) LIKE LOWER(:search) OR LOWER(task.description) LIKE LOWER(:search))',
+				{ search: `%${search}%` },
+			);
 		}
 
+		const tasks = await query.getMany();
 		return tasks;
 	}
 }
