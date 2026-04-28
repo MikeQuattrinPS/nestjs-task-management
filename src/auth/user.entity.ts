@@ -1,5 +1,6 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Task } from '../tasks/task.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity()
 export class User {
@@ -10,6 +11,7 @@ export class User {
 	username: string;
 
 	@Column()
+	@Exclude()
 	password: string;
 
 	@OneToMany(() => Task, (task) => task.user, { eager: true })
