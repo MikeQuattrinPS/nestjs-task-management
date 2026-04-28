@@ -1,6 +1,7 @@
 import {
 	InternalServerErrorException,
 	ConflictException,
+	UnauthorizedException,
 	Injectable,
 } from '@nestjs/common';
 import { User } from './user.entity';
@@ -32,6 +33,18 @@ export class AuthService {
 				throw new ConflictException('This username already exists');
 			}
 			throw new InternalServerErrorException();
+		}
+	}
+
+	async signIn(authCredentialsDto: AuthCredentialsDto): Promise<string> {
+		const { username, password } = authCredentialsDto;
+		const user = await this.usersRepository.findOne({ where: { username } });
+
+		if (user && (await bcrypt.compare(password, user.password))) {
+			// Generate and return a JWT or any other token here
+			return 'token';
+		} else {
+			throw new UnauthorizedException('Invalid credentials');
 		}
 	}
 }
